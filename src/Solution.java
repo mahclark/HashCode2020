@@ -35,9 +35,10 @@ class Book implements Comparable<Book> {
 
 public class Solution {
 
-    static HashSet<Book> taken = new HashSet<>();
+    static HashSet<Integer> taken = new HashSet<>();
 
     class Library {
+
         int index;
         int numBooks;
         int signup;
@@ -62,7 +63,7 @@ public class Solution {
             int i = 0;
             int score = 0;
             for (Book book : books) {
-                if (taken.contains(book)) {
+                if (taken.contains(book.index)) {
                     continue;
                 }
 
@@ -78,8 +79,12 @@ public class Solution {
 
         int priority(int totalDays) {
             int p = 0;
-            p += numBooks;
-            p += 1000   -   signup;
+            for (Book book : books) {
+                if (!taken.contains(book.index)) {
+                    p++;
+                }
+            }
+//            p += 1000   -   signup;
 //            p *= 1.0   *   maxScore(totalDays);
 //            p -= 100    *   booksPerDay;
 
@@ -93,7 +98,7 @@ public class Solution {
             int i = 0;
             List<Book> chosenBooks = new ArrayList<>();
             for (Book book : books) {
-                if (taken.contains(book)) {
+                if (taken.contains(book.index)) {
                     continue;
                 }
 
@@ -102,7 +107,7 @@ public class Solution {
                     break;
                 }
                 chosenBooks.add(book);
-                taken.add(book);
+                taken.add(book.index);
             }
 
             return chosenBooks;
@@ -170,6 +175,8 @@ public class Solution {
 
             List<Integer> bookScores = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
             Set<Library> libraries = new HashSet<>();
+
+            taken.clear();
 
             for (int libIndex = 0; libIndex < numLibs; libIndex++) {
                 String[] firstLine = br.readLine().split(" ");
