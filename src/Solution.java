@@ -2,10 +2,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.TreeSet;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class Book implements Comparable<Book> {
@@ -40,9 +40,79 @@ class Library {
     void setBooks(TreeSet<Book> books) {
         this.books = books;
     }
+
+    int maxScore(int daysLeft) {
+        daysLeft -= signup;
+        int bookOutput = Math.min(Math.max(daysLeft*booksPerDay, 0), numBooks);
+
+        int i = 0;
+        int score = 0;
+        for (Book book : books) {
+            i++;
+            if (i > bookOutput) {
+                break;
+            }
+            score += book.score;
+        }
+
+        return score;
+    }
+
+    List<Book> getBooks(int daysLeft) {
+        daysLeft -= signup;
+        int bookOutput = Math.min(Math.max(daysLeft*booksPerDay, 0), numBooks);
+
+        int i = 0;
+        List<Book> chosenBooks = new ArrayList<>();
+        for (Book book : books) {
+            i++;
+            if (i > bookOutput) {
+                break;
+            }
+            chosenBooks.add(book);
+        }
+
+        return chosenBooks;
+    }
 }
 
 public class Solution {
+
+
+    public static List<String> solve(Set<Library> libs, int daysLeft) {
+        List<String> lines = new ArrayList<>();
+        int numLibs = 0;
+
+        while (daysLeft > 0) {
+            Library bestLib = null;
+            int bestScore = 0;
+            for (Library lib : libs) {
+                int score = lib.maxScore(daysLeft);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestLib = lib;
+                }
+            }
+
+            if (bestLib == null) break;
+            numLibs += 1;
+
+            List<Book> books = bestLib.getBooks(daysLeft);
+            daysLeft -= bestLib.signup;
+            libs.remove(bestLib);
+            lines.add(bestLib.index + " " + books.size());
+
+            StringBuilder ans = new StringBuilder();
+            for (Book x : books) {
+                ans.append(x.index).append(" ");
+            }
+            lines.add(ans.toString().trim());
+        }
+
+        lines.add(0, String.valueOf(numLibs));
+
+        return lines;
+    }
 
     public static void main(String[] args) throws IOException {
         List<String> paths = List.of(
@@ -64,6 +134,7 @@ public class Solution {
             int numDays =  Integer.parseInt(line1[2]);
 
             List<Integer> bookScores = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
+            Set<Library> libraries = new HashSet<>();
 
             for (int libIndex = 0; libIndex < numLibs; libIndex++) {
                 String[] firstLine = br.readLine().split(" ");
@@ -75,7 +146,13 @@ public class Solution {
                 }
 
                 library.setBooks(bookSet);
+
+                libraries.add(library);
             }
+
+            Path outFile = Paths.get("src\\output\\" + path + ".out");
+            Files.write(outFile, Solution.solve(libraries, numDays));
+            System.out.println(path + " is done");
         }
     }
 }
