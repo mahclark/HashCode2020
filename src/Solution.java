@@ -21,6 +21,16 @@ class Book implements Comparable<Book> {
     public int compareTo(Book o) {
         return Integer.compare(o.score, score);
     }
+
+    @Override
+    public boolean equals(Object o) {
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(index, score);
+    }
 }
 
 public class Solution {
@@ -32,7 +42,7 @@ public class Solution {
         int numBooks;
         int signup;
         int booksPerDay;
-        TreeSet<Book> books;
+        Set<Book> books;
 
         public Library(int index, int numBooks, int signup, int booksPerDay) {
             this.index = index;
@@ -41,7 +51,7 @@ public class Solution {
             this.booksPerDay = booksPerDay;
         }
 
-        void setBooks(TreeSet<Book> books) {
+        void setBooks(Set<Book> books) {
             this.books = books;
         }
 
@@ -69,9 +79,9 @@ public class Solution {
         int priority(int totalDays) {
             int p = 0;
             p += numBooks;
-//            p += 1.01   *   maxScore(totalDays);
-//            p -= 100    *   signup;
-//            p += 0      *   booksPerDay;
+            p += 1000   -   signup;
+//            p *= 1.0   *   maxScore(totalDays);
+//            p -= 100    *   booksPerDay;
 
             return p;
         }
@@ -106,7 +116,7 @@ public class Solution {
 
         while (daysLeft > 0) {
             Library bestLib = null;
-            int bestScore = 0;
+            int bestScore = Integer.MIN_VALUE;
             for (Library lib : libs) {
                 int score = lib.priority(daysLeft);
                 if (score > bestScore) {
@@ -165,10 +175,13 @@ public class Solution {
                 String[] firstLine = br.readLine().split(" ");
                 Library library = new Solution().new Library(libIndex, Integer.parseInt(firstLine[0]), Integer.parseInt(firstLine[1]), Integer.parseInt(firstLine[2]));
                 List<Integer> books = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
-                TreeSet<Book> bookSet = new TreeSet<>();
+                List<Book> bookList = new ArrayList<>();
                 for (int book : books) {
-                    bookSet.add(new Book(book, bookScores.get(book)));
+                    Book newBook = new Book(book, bookScores.get(book));
+                    bookList.add(newBook);
                 }
+                Collections.sort(bookList);
+                Set<Book> bookSet = new HashSet<>(bookList);
 
                 library.setBooks(bookSet);
 
