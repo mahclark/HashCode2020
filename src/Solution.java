@@ -23,60 +23,71 @@ class Book implements Comparable<Book> {
     }
 }
 
-class Library {
-    int index;
-    int numBooks;
-    int signup;
-    int booksPerDay;
-    TreeSet<Book> books;
-
-    public Library(int index, int numBooks, int signup, int booksPerDay) {
-        this.index = index;
-        this.numBooks = numBooks;
-        this.signup = signup;
-        this.booksPerDay = booksPerDay;
-    }
-
-    void setBooks(TreeSet<Book> books) {
-        this.books = books;
-    }
-
-    int maxScore(int daysLeft) {
-        daysLeft -= signup;
-        int bookOutput = Math.min(Math.max(daysLeft*booksPerDay, 0), numBooks);
-
-        int i = 0;
-        int score = 0;
-        for (Book book : books) {
-            i++;
-            if (i > bookOutput) {
-                break;
-            }
-            score += book.score;
-        }
-
-        return score;
-    }
-
-    List<Book> getBooks(int daysLeft) {
-        daysLeft -= signup;
-        int bookOutput = Math.min(Math.max(daysLeft*booksPerDay, 0), numBooks);
-
-        int i = 0;
-        List<Book> chosenBooks = new ArrayList<>();
-        for (Book book : books) {
-            i++;
-            if (i > bookOutput) {
-                break;
-            }
-            chosenBooks.add(book);
-        }
-
-        return chosenBooks;
-    }
-}
-
 public class Solution {
+
+    static HashSet<Book> taken = new HashSet<>();
+
+    class Library {
+        int index;
+        int numBooks;
+        int signup;
+        int booksPerDay;
+        TreeSet<Book> books;
+
+        public Library(int index, int numBooks, int signup, int booksPerDay) {
+            this.index = index;
+            this.numBooks = numBooks;
+            this.signup = signup;
+            this.booksPerDay = booksPerDay;
+        }
+
+        void setBooks(TreeSet<Book> books) {
+            this.books = books;
+        }
+
+        int maxScore(int daysLeft) {
+            daysLeft -= signup;
+            int bookOutput = Math.min(Math.max(daysLeft*booksPerDay, 0), numBooks);
+
+            int i = 0;
+            int score = 0;
+            for (Book book : books) {
+                if (taken.contains(book)) {
+                    continue;
+                }
+
+                i++;
+                if (i > bookOutput) {
+                    break;
+                }
+                score += book.score;
+            }
+
+            return score;
+        }
+
+        List<Book> getBooks(int daysLeft) {
+            daysLeft -= signup;
+            int bookOutput = Math.min(Math.max(daysLeft*booksPerDay, 0), numBooks);
+
+            int i = 0;
+            List<Book> chosenBooks = new ArrayList<>();
+            for (Book book : books) {
+                if (taken.contains(book)) {
+                    continue;
+                }
+
+                i++;
+                if (i > bookOutput) {
+                    break;
+                }
+                chosenBooks.add(book);
+                taken.add(book);
+            }
+
+            return chosenBooks;
+        }
+    }
 
 
     public static List<String> solve(Set<Library> libs, int daysLeft) {
@@ -138,7 +149,7 @@ public class Solution {
 
             for (int libIndex = 0; libIndex < numLibs; libIndex++) {
                 String[] firstLine = br.readLine().split(" ");
-                Library library = new Library(libIndex, Integer.parseInt(firstLine[0]), Integer.parseInt(firstLine[1]), Integer.parseInt(firstLine[2]));
+                Library library = new Solution().new Library(libIndex, Integer.parseInt(firstLine[0]), Integer.parseInt(firstLine[1]), Integer.parseInt(firstLine[2]));
                 List<Integer> books = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).boxed().collect(Collectors.toList());
                 TreeSet<Book> bookSet = new TreeSet<>();
                 for (int book : books) {
