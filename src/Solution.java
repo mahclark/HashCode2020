@@ -66,6 +66,16 @@ public class Solution {
             return score;
         }
 
+        int priority(int totalDays) {
+            int p = 0;
+            p += numBooks;
+//            p += 1.01   *   maxScore(totalDays);
+//            p -= 100    *   signup;
+//            p += 0      *   booksPerDay;
+
+            return p;
+        }
+
         List<Book> getBooks(int daysLeft) {
             daysLeft -= signup;
             int bookOutput = Math.min(Math.max(daysLeft*booksPerDay, 0), numBooks);
@@ -98,7 +108,7 @@ public class Solution {
             Library bestLib = null;
             int bestScore = 0;
             for (Library lib : libs) {
-                int score = lib.maxScore(daysLeft);
+                int score = lib.priority(daysLeft);
                 if (score > bestScore) {
                     bestScore = score;
                     bestLib = lib;
@@ -111,13 +121,17 @@ public class Solution {
             List<Book> books = bestLib.getBooks(daysLeft);
             daysLeft -= bestLib.signup;
             libs.remove(bestLib);
-            lines.add(bestLib.index + " " + books.size());
+            if (books.size() == 0) {
+                numLibs -= 1;
+            } else {
+                lines.add(bestLib.index + " " + books.size());
 
-            StringBuilder ans = new StringBuilder();
-            for (Book x : books) {
-                ans.append(x.index).append(" ");
+                StringBuilder ans = new StringBuilder();
+                for (Book x : books) {
+                    ans.append(x.index).append(" ");
+                }
+                lines.add(ans.toString().trim());
             }
-            lines.add(ans.toString().trim());
         }
 
         lines.add(0, String.valueOf(numLibs));
